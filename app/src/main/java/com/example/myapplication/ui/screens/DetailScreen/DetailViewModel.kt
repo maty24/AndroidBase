@@ -1,35 +1,46 @@
 package com.example.myapplication.ui.screens.DetailScreen
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.data.api.RetrofitClient
 import com.example.myapplication.data.model.Post
+import com.example.myapplication.data.repository.PostRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+
 
 class DetailViewModel : ViewModel() {
-    private val _post = MutableLiveData<Post?>()
-    val post: LiveData<Post?> = _post
+
+    private val postRepository = PostRepository()
+
+    private val _post = MutableStateFlow<Post?>(null)
+    val post: StateFlow<Post?> = _post
+
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
 
     fun fetchPostById(postId: Int) {
+        _loading.value = true  // Iniciamos el estado de carga
         viewModelScope.launch {
-            RetrofitClient.apiService.getPostById(postId).enqueue(object : Callback<Post> {
-                override fun onResponse(call: Call<Post>, response: Response<Post>) {
-                    if (response.isSuccessful) {
-                        _post.value = response.body()
-                    } else {
-                        _post.value = null
-                    }
-                }
-
-                override fun onFailure(call: Call<Post>, t: Throwable) {
+            try {
+                val response = postRepository.getPostById(postId)
+                if (response.isSuccessful) {
+                    _post.value = response.body()  // Asignamos el post recibido
+                    _error.value = null
+                } else {
+                    _error.value = "Error: ${response.code()} - ${response.message()}"
                     _post.value = null
                 }
-            })
+            } catch (e: Exception) {
+                // Manejamos el error genérico
+                _error.value = "Exception: ${e.message}"
+                _post.value = null
+            } finally {
+                _loading.value = false  // Terminamos el estado de carga
+            }
         }
     }
 }

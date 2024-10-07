@@ -12,7 +12,6 @@ object RetrofitClient {
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(PostApiService::class.java) //Crea una implementación de la interfaz ApiService que definiste. Retrofit utiliza esta implementación para realizar las solicitudes a la API.
-
+            .create(PostApiService::class.java)
     }
 }

@@ -62,7 +62,8 @@ dependencies {
     // Lifecycle components for MVVM
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation("androidx.compose.runtime:runtime-livedata:1.0.5") // Add this line
+    implementation("androidx.compose.runtime:runtime-livedata:1.0.5")
+    implementation(libs.androidx.ui.test.android) // Add this line
 
     // Testing dependencies
     testImplementation(libs.junit)

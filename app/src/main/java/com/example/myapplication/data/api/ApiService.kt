@@ -2,13 +2,14 @@ package com.example.myapplication.data.api
 
 import com.example.myapplication.data.model.Post
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 
 interface PostApiService {
     @GET("posts")
-    fun getPosts(): Call<List<Post>>
+    suspend fun getPosts(): Response<List<Post>>  // Ahora es una función suspendida, retorna la lista directamente
 
     @GET("posts/{id}")
-    fun getPostById(@Path("id") id: Int): Call<Post>
+    suspend fun getPostById(@Path("id") id: Int): Response<Post>  // Función suspendida para obtener un post
 }
