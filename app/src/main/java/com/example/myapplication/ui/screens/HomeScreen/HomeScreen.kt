@@ -3,6 +3,7 @@ package com.example.myapplication.ui.screens.HomeScreen
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -27,25 +28,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.myapplication.data.UserPreferences
 import com.example.myapplication.data.model.Post
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavHostController, homeViewModel: HomeViewModel = viewModel()) {
-    // Obtenemos el estado del ViewModel con StateFlow
+fun HomeScreen(
+    navController: NavHostController,
+    userPreferences: UserPreferences,
+    homeViewModel: HomeViewModel = viewModel()
+) {
     val posts by homeViewModel.posts.collectAsState()
     val isLoading by homeViewModel.loading.collectAsState()
     val errorMessage by homeViewModel.error.collectAsState()
+    val userName by userPreferences.userName.collectAsState(initial = "ols")
 
-    // Usamos LaunchedEffect para que fetchPosts se ejecute solo una vez al cargar la pantalla
     LaunchedEffect(Unit) {
-        homeViewModel.fetchPosts()
+        if (posts.isEmpty()) { // Solo llamar a fetchPosts si no hay posts
+            homeViewModel.fetchPosts()
+        }
     }
 
-    // Manejamos diferentes estados de la UI
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Posts") })
+            TopAppBar(title = { Text("Posts de $userName") })
         }
     ) { innerPadding ->
         when {
@@ -66,7 +72,10 @@ fun HomeScreen(navController: NavHostController, homeViewModel: HomeViewModel = 
                 }
             }
             else -> {
-                LazyColumn(contentPadding = innerPadding) {
+                LazyColumn(
+                    modifier = Modifier.padding(innerPadding),
+                    contentPadding = PaddingValues(8.dp)
+                ) {
                     items(posts, key = { it.id }) { post ->
                         PostItem(post) {
                             navController.navigate("detail/${post.id}")

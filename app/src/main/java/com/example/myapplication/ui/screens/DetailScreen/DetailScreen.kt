@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.data.model.Post
 
 
 @Composable
@@ -28,9 +29,7 @@ fun DetailScreen(postId: Int?, detailViewModel: DetailViewModel = viewModel()) {
 
     // Llamamos a la función fetchPostById solo una vez, cuando se carga la pantalla
     LaunchedEffect(postId) {
-        postId?.let {
-            detailViewModel.fetchPostById(it)
-        }
+        detailViewModel.fetchPostById(postId)
     }
 
     // Manejamos los diferentes estados de la UI
@@ -47,14 +46,21 @@ fun DetailScreen(postId: Int?, detailViewModel: DetailViewModel = viewModel()) {
         }
         post != null -> {
             // Mostramos los detalles del post
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "Title: ${post?.title}", style = MaterialTheme.typography.headlineSmall)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = post?.body ?: "", style = MaterialTheme.typography.bodyLarge)
-            }
+            PostDetail(post!!)
         }
         else -> {
-            Text(text = "No se encontró el post.")
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "No se encontró el post.")
+            }
         }
+    }
+}
+
+@Composable
+fun PostDetail(post: Post) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text(text = "Title: ${post.title}", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = post.body, style = MaterialTheme.typography.bodyLarge)
     }
 }

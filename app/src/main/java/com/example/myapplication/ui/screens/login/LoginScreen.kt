@@ -1,15 +1,11 @@
 package com.example.myapplication.ui.screens.login
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,16 +16,33 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-
+import com.example.myapplication.data.UserPreferences
+import com.example.myapplication.data.repository.PrestamoRepositoryLogin
+import com.example.myapplication.ui.navigation.navigateToHome
 
 @Composable
-fun LoginScreen(navController: NavHostController) {
+fun LoginScreen(
+    navController: NavHostController,
+    repository: PrestamoRepositoryLogin,
+    userPreferences: UserPreferences
+) {
+    val factory = LoginViewModelFactory(repository, userPreferences)
+    val loginViewModel: LoginViewModel = viewModel(factory = factory)
+
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    // Layout principal de la pantalla
+    val loading by loginViewModel.loading.collectAsState()
+    val errorMessage by loginViewModel.error.collectAsState()
+    val success by loginViewModel.success.collectAsState()
+
+    if (success) {
+        navigateToHome(navController)
+    }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -49,7 +62,6 @@ fun LoginScreen(navController: NavHostController) {
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // Campo de texto para el usuario
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -60,7 +72,6 @@ fun LoginScreen(navController: NavHostController) {
                     .padding(bottom = 16.dp)
             )
 
-            // Campo de texto para la contraseña
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -86,16 +97,28 @@ fun LoginScreen(navController: NavHostController) {
                     .padding(bottom = 16.dp)
             )
 
-            // Botón de inicio de sesión
+            errorMessage?.let { message ->
+                Log.e("LoginScreen", "Error: $message")
+            }
+
             Button(
                 onClick = {
-                    navController.navigate("home")
+                    if (username.isNotEmpty() && password.isNotEmpty()) {
+                        loginViewModel.login(username, password)
+                    } else {
+                        loginViewModel.showError("Usuario y contraseña no pueden estar vacíos")
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .height(50.dp),
+                enabled = !loading
             ) {
-                Text(text = "Iniciar Sesión")
+                if (loading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text(text = "Iniciar Sesión")
+                }
             }
         }
     }

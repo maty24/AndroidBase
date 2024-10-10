@@ -22,25 +22,30 @@ class DetailViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-    fun fetchPostById(postId: Int) {
-        _loading.value = true  // Iniciamos el estado de carga
+    fun fetchPostById(postId: Int?) {
+        if (_post.value != null) return  // Evitamos hacer la llamada nuevamente si el post ya está cargado
+
+        _loading.value = true
         viewModelScope.launch {
             try {
                 val response = postRepository.getPostById(postId)
                 if (response.isSuccessful) {
                     _post.value = response.body()  // Asignamos el post recibido
-                    _error.value = null
+                    _error.value = null  // Limpiamos cualquier error anterior
                 } else {
-                    _error.value = "Error: ${response.code()} - ${response.message()}"
-                    _post.value = null
+                    handleError("Error: ${response.code()} - ${response.message()}")
                 }
             } catch (e: Exception) {
-                // Manejamos el error genérico
-                _error.value = "Exception: ${e.message}"
-                _post.value = null
+                handleError("Exception: ${e.message}")
             } finally {
-                _loading.value = false  // Terminamos el estado de carga
+                _loading.value = false
             }
         }
+    }
+
+    // Cambiamos la visibilidad a 'public' o 'internal' para que pueda ser llamada desde fuera
+    fun handleError(message: String) {
+        _error.value = message
+        _post.value = null
     }
 }

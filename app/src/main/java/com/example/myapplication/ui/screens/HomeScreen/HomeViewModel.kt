@@ -12,14 +12,13 @@ import kotlinx.coroutines.launch
 class HomeViewModel : ViewModel() {
     private val postRepository = PostRepository()
 
-    private val _posts =
-        MutableStateFlow<List<Post>>(emptyList()) //MutableStateFlow es una clase de Kotlin Coroutines que permite representar un valor que puede cambiar con el tiempo. En este caso, el valor es una lista de Pos
+    private val _posts = MutableStateFlow<List<Post>>(emptyList())
     val posts: StateFlow<List<Post>> = _posts
 
-    private val _loading = MutableStateFlow(false) // Para controlar el estado de carga
+    private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
-    private val _error = MutableStateFlow<String?>(null) // Para mostrar errores
+    private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
     fun fetchPosts() {
@@ -29,16 +28,20 @@ class HomeViewModel : ViewModel() {
                 val response = postRepository.getPosts()
                 if (response.isSuccessful) {
                     _posts.value = response.body() ?: emptyList()
-                    _error.value =
-                        null  // Limpiamos cualquier error anterior si la llamada es exitosa
+                    _error.value = null // Limpiamos cualquier error anterior si la llamada es exitosa
                 } else {
-                    _error.value = "Error: ${response.code()} - ${response.message()}"
+                    handleError("Error: ${response.code()} - ${response.message()}")
                 }
             } catch (e: Exception) {
-                _error.value = "Exception: ${e.message}"
+                handleError("Exception: ${e.message}")
             } finally {
-                _loading.value = false  // Aseguramos que el estado de carga siempre se actualice
+                _loading.value = false // Aseguramos que el estado de carga siempre se actualice
             }
         }
+    }
+
+    private fun handleError(message: String) {
+        _error.value = message
+        _posts.value = emptyList() // Limpiamos la lista de posts si hay error
     }
 }
