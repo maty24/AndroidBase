@@ -2,8 +2,11 @@ package com.example.myapplication.ui.screens.DetailScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.api.RetrofitClient
 import com.example.myapplication.data.model.Post
+import com.example.myapplication.data.model.PrestamosByID
 import com.example.myapplication.data.repository.PostRepository
+import com.example.myapplication.data.repository.PrestamoRepositoryLogin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -12,9 +15,14 @@ import kotlinx.coroutines.launch
 class DetailViewModel : ViewModel() {
 
     private val postRepository = PostRepository()
+    private val prestamoRepository = PrestamoRepositoryLogin(RetrofitClient.apiPrestamoService)
 
     private val _post = MutableStateFlow<Post?>(null)
     val post: StateFlow<Post?> = _post
+
+    private val _prestamos = MutableStateFlow<PrestamosByID?>(null)
+    val prestamos: StateFlow<PrestamosByID?> = _prestamos
+
 
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading

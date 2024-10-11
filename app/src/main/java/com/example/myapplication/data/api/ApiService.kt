@@ -2,6 +2,8 @@ package com.example.myapplication.data.api
 
 import com.example.myapplication.data.model.Login
 import com.example.myapplication.data.model.Post
+import com.example.myapplication.data.model.PrestamosByID
+import com.example.myapplication.data.model.PrestamosPendiente
 import com.example.myapplication.data.model.ResponseLogin
 import retrofit2.Response
 import retrofit2.http.Body
@@ -21,4 +23,11 @@ interface PostApiService {
 interface PrestamoService {
     @POST("usuario/login")
     suspend fun login(@Body login: Login): Response<ResponseLogin>
+
+    @GET("prestamo/lector/{id}")
+    suspend fun getPrestamos(@Path("id") id: Int): Response<List<PrestamosPendiente>>
+
+    @GET("prestamo/{id}")
+    suspend fun getPrestamosByID(@Path("id") id: Int): Response<PrestamosByID>
+
 }

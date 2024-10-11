@@ -4,6 +4,8 @@ import com.example.myapplication.data.api.PrestamoService
 import com.example.myapplication.data.api.RetrofitClient
 import com.example.myapplication.data.model.Login
 import com.example.myapplication.data.model.Post
+import com.example.myapplication.data.model.PrestamosByID
+import com.example.myapplication.data.model.PrestamosPendiente
 import com.example.myapplication.data.model.ResponseLogin
 import retrofit2.Response
 
@@ -21,8 +23,17 @@ class PostRepository {
 
 
 class PrestamoRepositoryLogin(apiPrestamoService: PrestamoService) {
+
     suspend fun login(email: String, password: String): Response<ResponseLogin> {
         val loginRequest = Login(email, password)
         return RetrofitClient.apiPrestamoService.login(loginRequest)
+    }
+
+    suspend fun getPrestamos(id: Int): Response<List<PrestamosPendiente>> {
+        return RetrofitClient.apiPrestamoService.getPrestamos(id)
+    }
+
+    suspend fun getPrestamosByID(id: Int): Response<PrestamosByID> {
+        return RetrofitClient.apiPrestamoService.getPrestamosByID(id)
     }
 }
